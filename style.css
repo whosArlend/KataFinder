@@ -47,9 +47,34 @@ body {
     0 10px 30px rgba(15, 23, 42, 0.07),
     0 2px 8px rgba(15, 23, 42, 0.05);
   padding: 16px 16px 20px;
+  flex: 1;
   display: grid;
   grid-template-columns: 1fr;
   gap: 16px;
+}
+
+.app-footer {
+  width: 100%;
+  max-width: 900px;
+  margin-top: 16px;
+  padding: 10px 0 8px;
+  text-align: center;
+  font-size: 0.78rem;
+  color: #9ca3af;
+}
+
+.app-footer a {
+  display: inline-block;
+  margin-top: 4px;
+  font-size: 0.78rem;
+  color: #6b7280;
+  text-decoration: none;
+  border-bottom: 1px dotted rgba(107, 114, 128, 0.5);
+}
+
+.app-footer a:hover {
+  color: #374151;
+  border-bottom-color: rgba(55, 65, 81, 0.7);
 }
 
 @media (min-width: 768px) {

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KataFinder</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app">
+    <header class="app-header">
+      <h1>KataFinder for Sambung Kata</h1>
+      <p class="subtitle">
+        Temukan kata-kata Bahasa Indonesia dari KBBI untuk game Sambung Kata di Roblox.
+      </p>
+    </header>
+
+    <main class="app-main">
+      <section class="keyboard-section">
+        <h2 class="section-title">Pilih Huruf</h2>
+        <div id="alphabet-buttons" class="alphabet-grid"></div>
+      </section>
+
+      <section class="search-section">
+        <h2 class="section-title">Cari Kata</h2>
+        <input
+          id="search-input"
+          type="text"
+          placeholder="Ketik awalan kata, misalnya: ma, per, ber..."
+          autocomplete="off"
+        />
+        <div class="meta-row">
+          <span id="result-count">Menunggu input...</span>
+          <span class="meta-hint">Klik kata untuk menyalin ke clipboard</span>
+        </div>
+      </section>
+
+      <section class="results-section">
+        <div id="results" class="results-list"></div>
+      </section>
+    </main>
+
+    <div id="toast" class="toast" aria-live="polite"></div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
+

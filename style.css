@@ -1,0 +1,246 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: #f5f5f7;
+  color: #1f2933;
+}
+
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px;
+}
+
+.app-header {
+  width: 100%;
+  max-width: 900px;
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.app-header h1 {
+  margin: 0 0 4px;
+  font-size: 2.2rem;
+  letter-spacing: 0.03em;
+}
+
+.subtitle {
+  margin: 0;
+  color: #6b7280;
+  font-size: 0.95rem;
+}
+
+.app-main {
+  width: 100%;
+  max-width: 900px;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow:
+    0 10px 30px rgba(15, 23, 42, 0.07),
+    0 2px 8px rgba(15, 23, 42, 0.05);
+  padding: 16px 16px 20px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+@media (min-width: 768px) {
+  .app-main {
+    grid-template-columns: 1.1fr 1.4fr;
+    grid-template-rows: auto 1fr;
+    grid-template-areas:
+      "keyboard search"
+      "keyboard results";
+  }
+
+  .keyboard-section {
+    grid-area: keyboard;
+  }
+
+  .search-section {
+    grid-area: search;
+  }
+
+  .results-section {
+    grid-area: results;
+  }
+}
+
+.section-title {
+  margin: 0 0 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #4b5563;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.keyboard-section {
+  border-right: 0;
+  padding-right: 0;
+}
+
+@media (min-width: 768px) {
+  .keyboard-section {
+    border-right: 1px solid #e5e7eb;
+    padding-right: 16px;
+  }
+}
+
+.alphabet-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(34px, 1fr));
+  gap: 6px;
+}
+
+.alphabet-button {
+  border: 1px solid #e5e7eb;
+  background: #f9fafb;
+  border-radius: 999px;
+  padding: 6px 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #374151;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.05s ease, box-shadow 0.1s ease,
+    border-color 0.15s ease, color 0.15s ease;
+}
+
+.alphabet-button:hover {
+  background: #e5f0ff;
+  border-color: #2563eb;
+  color: #1d4ed8;
+  box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.2);
+}
+
+.alphabet-button:active {
+  transform: scale(0.97);
+  background: #dbeafe;
+}
+
+.alphabet-button.active {
+  background: #2563eb;
+  border-color: #2563eb;
+  color: #ffffff;
+  box-shadow:
+    0 6px 16px rgba(37, 99, 235, 0.35),
+    0 0 0 1px rgba(37, 99, 235, 0.45);
+}
+
+.search-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+#search-input {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 999px;
+  border: 1px solid #d1d5db;
+  font-size: 0.97rem;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s;
+  background: #f9fafb;
+}
+
+#search-input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+  background: #ffffff;
+}
+
+.meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  font-size: 0.83rem;
+}
+
+#result-count {
+  font-weight: 500;
+  color: #374151;
+}
+
+.meta-hint {
+  color: #9ca3af;
+}
+
+.results-section {
+  margin-top: 4px;
+}
+
+.results-list {
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  background: #f9fafb;
+  padding: 6px;
+  max-height: 360px;
+  overflow-y: auto;
+  font-size: 0.93rem;
+}
+
+.result-item {
+  padding: 6px 10px;
+  border-radius: 999px;
+  cursor: pointer;
+  display: inline-flex;
+  margin: 2px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  transition: background 0.15s ease, transform 0.05s ease, box-shadow 0.1s ease,
+    border-color 0.15s ease, color 0.15s ease;
+  white-space: nowrap;
+}
+
+.result-item:hover {
+  background: #eff6ff;
+  border-color: #2563eb;
+  color: #1d4ed8;
+  box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.2);
+}
+
+.result-item:active {
+  transform: scale(0.97);
+}
+
+.results-empty {
+  padding: 8px 4px;
+  color: #9ca3af;
+  font-size: 0.86rem;
+}
+
+.toast {
+  position: fixed;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%) translateY(120%);
+  padding: 10px 14px;
+  background: #111827;
+  color: #f9fafb;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  box-shadow:
+    0 10px 25px rgba(15, 23, 42, 0.4),
+    0 0 0 1px rgba(31, 41, 55, 0.4);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  z-index: 50;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+

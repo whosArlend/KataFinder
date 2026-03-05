@@ -169,7 +169,7 @@ You can use any simple static server. For example:
 - **With Python 3** (most systems):
 
   ```bash
-  cd KataFinderforSambungKataRoblox
+  cd KataFinder
   python -m http.server 8000
   ```
 

@@ -1,21 +1,24 @@
-// Konfigurasi file JSON KBBI
-const KBBI_FILES = [
-  "kbbi/kbbi_v_part1.json",
-  "kbbi/kbbi_v_part2.json",
-  "kbbi/kbbi_v_part3.json",
-  "kbbi/kbbi_v_part4.json",
-];
-
 const MAX_RESULTS = 200;
+const KBBI_DIR = "kbbi";
 
-let allWords = [];
-let isLoaded = false;
+const datasetCache = new Map(); // letter -> string[]
+const datasetLoadPromises = new Map(); // letter -> Promise<string[]>
+const datasetLoadErrors = new Map(); // letter -> Error
+let latestSearchId = 0;
 
 const alphabetContainer = document.getElementById("alphabet-buttons");
 const searchInput = document.getElementById("search-input");
 const resultsContainer = document.getElementById("results");
 const resultCountLabel = document.getElementById("result-count");
 const toast = document.getElementById("toast");
+
+function renderInfo(message) {
+  resultsContainer.innerHTML = "";
+  const info = document.createElement("div");
+  info.className = "results-empty";
+  info.textContent = message;
+  resultsContainer.appendChild(info);
+}
 
 function syncAlphabetActive(value) {
   const v = String(value || "");
@@ -40,46 +43,53 @@ function showToast(message) {
   }, 1800);
 }
 
-async function loadKbbiFiles() {
-  try {
-    const words = [];
+function getFirstLetter(query) {
+  const q = (query || "").toLowerCase().trim();
+  if (!q) return "";
+  const first = q[0];
+  if (!/^[a-z]$/.test(first)) return "";
+  return first;
+}
 
-    for (const file of KBBI_FILES) {
-      const res = await fetch(file);
-      if (!res.ok) continue;
+async function loadDatasetForLetter(letter) {
+  const l = String(letter || "").toLowerCase();
+  if (!/^[a-z]$/.test(l)) return [];
+
+  if (datasetCache.has(l)) return datasetCache.get(l);
+  if (datasetLoadPromises.has(l)) return datasetLoadPromises.get(l);
+
+  const promise = (async () => {
+    try {
+      datasetLoadErrors.delete(l);
+      const res = await fetch(`${KBBI_DIR}/${l}.json`);
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status} saat memuat ${KBBI_DIR}/${l}.json`);
+      }
 
       const data = await res.json();
-
-      if (Array.isArray(data)) {
-        // Jika file benar-benar berisi array kata
-        for (const item of data) {
-          if (typeof item === "string") words.push(item);
-        }
-      } else if (data && typeof data === "object") {
-        // Jika format berupa objek besar, gunakan key sebagai kata
-        words.push(...Object.keys(data));
+      if (!Array.isArray(data)) {
+        throw new Error(`Format tidak valid: ${KBBI_DIR}/${l}.json harus berupa array.`);
       }
+
+      const cleaned = data
+        .map((w) => String(w).toLowerCase().trim())
+        .filter(Boolean);
+
+      const unique = Array.from(new Set(cleaned));
+      datasetCache.set(l, unique);
+      return unique;
+    } catch (err) {
+      console.error("Gagal memuat dataset per huruf:", err);
+      datasetLoadErrors.set(l, err);
+      datasetCache.set(l, []);
+      return [];
+    } finally {
+      datasetLoadPromises.delete(l);
     }
+  })();
 
-    const cleaned = words
-      .map((w) => String(w).toLowerCase().trim())
-      .filter(Boolean);
-
-    // Hilangkan duplikasi
-    allWords = Array.from(new Set(cleaned));
-    isLoaded = true;
-
-    if (!allWords.length) {
-      resultCountLabel.textContent = "Dataset kosong atau gagal dimuat.";
-    } else {
-      resultCountLabel.textContent = `Dataset siap. Total kata unik: ${allWords.length.toLocaleString(
-        "id-ID"
-      )}.`;
-    }
-  } catch (err) {
-    console.error("Gagal memuat KBBI:", err);
-    resultCountLabel.textContent = "Gagal memuat data KBBI.";
-  }
+  datasetLoadPromises.set(l, promise);
+  return promise;
 }
 
 function buildAlphabetButtons() {
@@ -109,6 +119,7 @@ function buildAlphabetButtons() {
   clearBtn.textContent = "CLEAR";
   clearBtn.className = "alphabet-button alphabet-clear";
   clearBtn.addEventListener("click", () => {
+    latestSearchId++;
     searchInput.value = "";
     syncAlphabetActive("");
     resultCountLabel.textContent = "Menunggu input...";
@@ -164,12 +175,8 @@ function renderResults(words, query) {
   resultsContainer.appendChild(frag);
 }
 
-function runSearch(rawQuery) {
-  if (!isLoaded) {
-    resultCountLabel.textContent = "Memuat data KBBI, harap tunggu...";
-    return;
-  }
-
+async function runSearch(rawQuery) {
+  const searchId = ++latestSearchId;
   const query = (rawQuery || "").toLowerCase().trim();
 
   if (!query) {
@@ -178,9 +185,29 @@ function runSearch(rawQuery) {
     return;
   }
 
+  const firstLetter = getFirstLetter(query);
+  if (!firstLetter) {
+    resultCountLabel.textContent = "Gunakan awalan huruf A-Z untuk pencarian.";
+    renderInfo("Awali pencarian dengan huruf A-Z, misalnya: a, ab, ber...");
+    return;
+  }
+
+  if (!datasetCache.has(firstLetter) && !datasetLoadPromises.has(firstLetter)) {
+    resultCountLabel.textContent = `Memuat dataset huruf "${firstLetter.toUpperCase()}"...`;
+  }
+
+  const wordsForLetter = await loadDatasetForLetter(firstLetter);
+  if (searchId !== latestSearchId) return;
+
+  if (datasetLoadErrors.has(firstLetter)) {
+    resultCountLabel.textContent = `Gagal memuat dataset huruf "${firstLetter.toUpperCase()}".`;
+    renderInfo("Gagal memuat data. Pastikan file dataset tersedia di folder kbbi/.");
+    return;
+  }
+
   const matches = [];
-  for (let i = 0; i < allWords.length; i++) {
-    const w = allWords[i];
+  for (let i = 0; i < wordsForLetter.length; i++) {
+    const w = wordsForLetter[i];
     if (w.startsWith(query)) {
       matches.push(w);
       if (matches.length >= MAX_RESULTS) break;
@@ -204,9 +231,7 @@ function setupSearchInput() {
   });
 
   searchInput.addEventListener("focus", () => {
-    if (!isLoaded) {
-      resultCountLabel.textContent = "Memuat data KBBI, harap tunggu...";
-    }
+    // Tidak memuat dataset saat startup (lazy load saat ada input)
   });
 }
 
@@ -214,7 +239,7 @@ function init() {
   buildAlphabetButtons();
   setupSearchInput();
   renderResults([], "");
-  loadKbbiFiles();
+  resultCountLabel.textContent = "Menunggu input...";
 }
 
 if (document.readyState === "loading") {

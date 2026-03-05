@@ -1,4 +1,4 @@
-KataFinder 🎮🇮🇩
+KataFinder
 ====
 
 Small, fast, and simple web app to help you **find Indonesian words from a KBBI-based dataset** – perfect for **word-chain games (Sambung Kata)**, especially those **Roblox word chain** games we all get stuck on.
